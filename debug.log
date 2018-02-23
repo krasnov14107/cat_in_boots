@@ -1,0 +1,3 @@
+[0223/130416.203:ERROR:crash_report_database_win.cc(568)] CreateDirectory C:\Program Files (x86)\Jarhair\Reports\Dump: Системе не удается найти указанный путь. (0x3)
+[0223/130416.223:ERROR:registration_protocol_win.cc(84)] TransactNamedPipe: Канал был закрыт. (0x6D)
+[0223/130416.224:ERROR:crash_report_database_win.cc(568)] CreateDirectory C:\Program Files (x86)\Jarhair\Reports\Dump: Системе не удается найти указанный путь. (0x3)
