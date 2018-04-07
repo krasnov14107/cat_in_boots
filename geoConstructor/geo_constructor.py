@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[81]:
+# In[168]:
 
 
 # добавим необходимый пакет с opencv
@@ -22,8 +22,13 @@ cv2.imshow("Original image", image)
 cv2.waitKey(0)
 print(image.shape)
 
+ed = cv2.Canny(image,100,200,apertureSize = 3)
+plt.subplot(122),plt.imshow(ed,cmap = 'gray')
+plt.title('Edge Image'), plt.xticks([]), plt.yticks([]) 
+plt.show()
 
-# In[82]:
+
+# In[169]:
 
 
 # compute the Scharr gradient magnitude representation of the images
@@ -39,7 +44,7 @@ gradient = cv2.convertScaleAbs(gradient)
 #cv2.waitKey(0)& 0xFF
 
 
-# In[83]:
+# In[170]:
 
 
 # blur and threshold the image
@@ -48,7 +53,7 @@ blurred = cv2.blur(gradient, (9, 9))#сглаживание высокочаст
 (_, thresh) = cv2.threshold(blurred, 225, 255, cv2.THRESH_BINARY)
 
 
-# In[84]:
+# In[171]:
 
 
 # construct a closing kernel and apply it to the thresholded image
@@ -56,7 +61,7 @@ kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (21, 7))
 closed = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
 
 
-# In[85]:
+# In[172]:
 
 
 # perform a series of erosions and dilations
@@ -64,7 +69,7 @@ closed = cv2.erode(closed, None, iterations = 4)
 closed = cv2.dilate(closed, None, iterations = 4)
 
 
-# In[86]:
+# In[173]:
 
 
 #cnts = cv2.findContours(closed.copy(), cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)[1]
@@ -79,7 +84,7 @@ closed = cv2.dilate(closed, None, iterations = 4)
 #cv2.waitKey(0)& 0xFF
 
 
-# In[87]:
+# In[174]:
 
 
 h = 640/10;
@@ -102,13 +107,13 @@ ar2.append(662)
 ar
 
 
-# In[88]:
+# In[175]:
 
 
 ar2
 
 
-# In[89]:
+# In[176]:
 
 
 gray = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
@@ -116,21 +121,47 @@ x1 = [];
 y1 = [];
 x2 = [];
 y2 = [];
-for edge2 in ar[0:-1]:
-    for edge1 in ar2[0:-1]:
-        crop_img = gray[int(edge2):int(edge2+s),int(edge1):int(edge1+h)];
-        edges = cv2.Canny(crop_img,10,10,apertureSize = 3);
-        minLineLength = 15
-        maxLineGap = 2
-        lines = cv2.HoughLinesP(edges,1,np.pi/180,15,minLineLength,maxLineGap);
-        if lines is not None: 
+for edge1 in ar[0:-1]:
+    for edge2 in ar2[0:-1]:
+        crop_img = gray[int(edge1):int(edge1+h),int(edge2):int(edge2+s)];
+        edges = cv2.Canny(crop_img,10,60,apertureSize = 3);
+        plt.subplot(122),plt.imshow(edges,cmap = 'gray')
+        plt.title('Edge Image'), plt.xticks([]), plt.yticks([]) 
+        plt.show()
+        
+        lines = cv2.HoughLines(edges,1,np.pi/180,60)
+        if lines is not None:
             for line in lines:
-                for x1,y1,x2,y2 in line:
+                for rho,theta in lines:
+                    a = np.cos(theta)
+                    b = np.sin(theta)
+                    x0 = a*rho
+                    y0 = b*rho
+                    x1 = int(x0 + 10*(-b))
+                    y1 = int(y0 + 10*(a))
+                    x2 = int(x0 - 10*(-b))
+                    y2 = int(y0 - 10*(a))
                     cv2.line(image,(int(edge2)+x1,int(edge1)+y1),(int(edge2)+x2,int(edge1)+y2),(0,255,0),2)
-x1 = [];
-y1 = [];
-x2 = [];
-y2 = [];
+        
+        #minLineLength = 10
+        #maxLineGap = 2
+        #lines = cv2.HoughLinesP(edges,1,np.pi/180,10,minLineLength,maxLineGap);
+        #if lines is not None: 
+        #    for line in lines:
+        #        for x1,y1,x2,y2 in line:
+        #            cv2.line(gray,(int(edge2)+x1,int(edge1)+y1),(int(edge2)+x2,int(edge1)+y2),(0,255,0),2)
 cv2.imshow("Image", image)
 cv2.waitKey(0)& 0xFF
+
+
+# In[161]:
+
+
+line
+
+
+# In[162]:
+
+
+lines
 
