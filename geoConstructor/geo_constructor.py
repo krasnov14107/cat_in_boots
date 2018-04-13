@@ -1,7 +1,7 @@
 
 # coding: utf-8
 
-# In[168]:
+# In[82]:
 
 
 # добавим необходимый пакет с opencv
@@ -22,13 +22,15 @@ cv2.imshow("Original image", image)
 cv2.waitKey(0)
 print(image.shape)
 
-ed = cv2.Canny(image,100,200,apertureSize = 3)
+plt.rcParams["figure.figsize"] = (66,64)
+
+ed = cv2.Canny(image,100,450,apertureSize = 3)
 plt.subplot(122),plt.imshow(ed,cmap = 'gray')
-plt.title('Edge Image'), plt.xticks([]), plt.yticks([]) 
+plt.title('Edge Image'), plt.xticks([]), plt.yticks([])
 plt.show()
 
 
-# In[169]:
+# In[83]:
 
 
 # compute the Scharr gradient magnitude representation of the images
@@ -44,7 +46,7 @@ gradient = cv2.convertScaleAbs(gradient)
 #cv2.waitKey(0)& 0xFF
 
 
-# In[170]:
+# In[84]:
 
 
 # blur and threshold the image
@@ -53,7 +55,7 @@ blurred = cv2.blur(gradient, (9, 9))#сглаживание высокочаст
 (_, thresh) = cv2.threshold(blurred, 225, 255, cv2.THRESH_BINARY)
 
 
-# In[171]:
+# In[85]:
 
 
 # construct a closing kernel and apply it to the thresholded image
@@ -61,7 +63,7 @@ kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (21, 7))
 closed = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
 
 
-# In[172]:
+# In[86]:
 
 
 # perform a series of erosions and dilations
@@ -69,7 +71,7 @@ closed = cv2.erode(closed, None, iterations = 4)
 closed = cv2.dilate(closed, None, iterations = 4)
 
 
-# In[173]:
+# In[87]:
 
 
 #cnts = cv2.findContours(closed.copy(), cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)[1]
@@ -84,7 +86,7 @@ closed = cv2.dilate(closed, None, iterations = 4)
 #cv2.waitKey(0)& 0xFF
 
 
-# In[174]:
+# In[88]:
 
 
 h = 640/10;
@@ -107,13 +109,13 @@ ar2.append(662)
 ar
 
 
-# In[175]:
+# In[89]:
 
 
 ar2
 
 
-# In[176]:
+# In[92]:
 
 
 gray = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
@@ -121,47 +123,66 @@ x1 = [];
 y1 = [];
 x2 = [];
 y2 = [];
+ar3 = [];
+ar3.append(0.0);
+ar3.append(662.0);
+q = ar2[10];
+#edge1-горизонтальная координата в ar[]
+#edge2-вертикальная координата в ar2[]
 for edge1 in ar[0:-1]:
-    for edge2 in ar2[0:-1]:
-        crop_img = gray[int(edge1):int(edge1+h),int(edge2):int(edge2+s)];
-        edges = cv2.Canny(crop_img,10,60,apertureSize = 3);
+    for edge2 in ar3[0:-1]:
+        crop_img = gray[int(ar3[0]):int(ar3[1]),int(edge1):int(edge1+h)];
+        edges = cv2.Canny(crop_img,100,450,apertureSize = 3);
+        
         plt.subplot(122),plt.imshow(edges,cmap = 'gray')
-        plt.title('Edge Image'), plt.xticks([]), plt.yticks([]) 
-        plt.show()
+        plt.title('Slice Image'), plt.xticks([]), plt.yticks([]) 
+        plt.show() 
+         
+#         lines = cv2.HoughLines(edges,1,np.pi/180,60)
+#         if lines is not None:
+#             for line in lines:
+#                 for rho,theta in lines:
+#                     a = np.cos(theta)
+#                     b = np.sin(theta)
+#                     x0 = a*rho
+#                     y0 = b*rho
+#                     x1 = int(x0 + 10*(-b))
+#                     y1 = int(y0 + 10*(a))
+#                     x2 = int(x0 - 10*(-b))
+#                     y2 = int(y0 - 10*(a))
+#                     cv2.line(image,(int(edge2)+x1,int(edge1)+y1),(int(edge2)+x2,int(edge1)+y2),(0,255,0),2)
         
-        lines = cv2.HoughLines(edges,1,np.pi/180,60)
-        if lines is not None:
+        minLineLength = 30
+        maxLineGap = 5
+        lines = cv2.HoughLinesP(edges,1,np.pi/180,30,minLineLength,maxLineGap);
+        if lines is not None: 
             for line in lines:
-                for rho,theta in lines:
-                    a = np.cos(theta)
-                    b = np.sin(theta)
-                    x0 = a*rho
-                    y0 = b*rho
-                    x1 = int(x0 + 10*(-b))
-                    y1 = int(y0 + 10*(a))
-                    x2 = int(x0 - 10*(-b))
-                    y2 = int(y0 - 10*(a))
-                    cv2.line(image,(int(edge2)+x1,int(edge1)+y1),(int(edge2)+x2,int(edge1)+y2),(0,255,0),2)
-        
-        #minLineLength = 10
-        #maxLineGap = 2
-        #lines = cv2.HoughLinesP(edges,1,np.pi/180,10,minLineLength,maxLineGap);
-        #if lines is not None: 
-        #    for line in lines:
-        #        for x1,y1,x2,y2 in line:
-        #            cv2.line(gray,(int(edge2)+x1,int(edge1)+y1),(int(edge2)+x2,int(edge1)+y2),(0,255,0),2)
-cv2.imshow("Image", image)
+                for x1,y1,x2,y2 in line:
+                    ctr_points = cv2.line(gray,(int(edge1)+x1,int(edge2)+y1),(int(edge1)+x2,int(edge2)+y2),(0,255,0),2)
+cv2.imshow("Image", gray)
 cv2.waitKey(0)& 0xFF
 
 
-# In[161]:
+# In[67]:
 
 
 line
 
 
-# In[162]:
+# In[68]:
 
 
 lines
+
+
+# In[69]:
+
+
+edges
+
+
+# In[79]:
+
+
+ctr_points
 
