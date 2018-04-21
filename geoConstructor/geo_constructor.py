@@ -1,13 +1,14 @@
 
 # coding: utf-8
 
-# In[82]:
+# In[205]:
 
 
 # добавим необходимый пакет с opencv
 from matplotlib import pyplot as plt
 import numpy as np
 import cv2
+import string 
  
 # загружаем изображение и отображаем его
 image = cv2.imread('astr_1_14.jpg')
@@ -30,7 +31,7 @@ plt.title('Edge Image'), plt.xticks([]), plt.yticks([])
 plt.show()
 
 
-# In[83]:
+# In[206]:
 
 
 # compute the Scharr gradient magnitude representation of the images
@@ -46,7 +47,7 @@ gradient = cv2.convertScaleAbs(gradient)
 #cv2.waitKey(0)& 0xFF
 
 
-# In[84]:
+# In[207]:
 
 
 # blur and threshold the image
@@ -55,7 +56,7 @@ blurred = cv2.blur(gradient, (9, 9))#сглаживание высокочаст
 (_, thresh) = cv2.threshold(blurred, 225, 255, cv2.THRESH_BINARY)
 
 
-# In[85]:
+# In[208]:
 
 
 # construct a closing kernel and apply it to the thresholded image
@@ -63,7 +64,7 @@ kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (21, 7))
 closed = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
 
 
-# In[86]:
+# In[209]:
 
 
 # perform a series of erosions and dilations
@@ -71,22 +72,7 @@ closed = cv2.erode(closed, None, iterations = 4)
 closed = cv2.dilate(closed, None, iterations = 4)
 
 
-# In[87]:
-
-
-#cnts = cv2.findContours(closed.copy(), cv2.RETR_EXTERNAL,cv2.CHAIN_APPROX_SIMPLE)[1]
-#c = sorted(cnts, key = cv2.contourArea, reverse = True)[0]
- 
-#rect = cv2.minAreaRect(c)
-#box = np.int0(cv2.boxPoints(rect))
-
-#cv2.drawContours(image, [box], -1, (0, 255, 0), 3)
-
-#cv2.imshow("Image", image)
-#cv2.waitKey(0)& 0xFF
-
-
-# In[88]:
+# In[214]:
 
 
 h = 640/10;
@@ -109,13 +95,13 @@ ar2.append(662)
 ar
 
 
-# In[89]:
+# In[215]:
 
 
 ar2
 
 
-# In[92]:
+# In[216]:
 
 
 gray = cv2.cvtColor(image,cv2.COLOR_BGR2GRAY)
@@ -123,6 +109,9 @@ x1 = [];
 y1 = [];
 x2 = [];
 y2 = [];
+edges = [];
+ctr_x = [];
+ctr_y = [];
 ar3 = [];
 ar3.append(0.0);
 ar3.append(662.0);
@@ -138,51 +127,86 @@ for edge1 in ar[0:-1]:
         plt.title('Slice Image'), plt.xticks([]), plt.yticks([]) 
         plt.show() 
          
-#         lines = cv2.HoughLines(edges,1,np.pi/180,60)
+#         lines = cv2.HoughLines(edges,1,np.pi/180,30)
 #         if lines is not None:
 #             for line in lines:
-#                 for rho,theta in lines:
+#                 for rho,theta in line:
 #                     a = np.cos(theta)
 #                     b = np.sin(theta)
 #                     x0 = a*rho
 #                     y0 = b*rho
-#                     x1 = int(x0 + 10*(-b))
-#                     y1 = int(y0 + 10*(a))
-#                     x2 = int(x0 - 10*(-b))
-#                     y2 = int(y0 - 10*(a))
-#                     cv2.line(image,(int(edge2)+x1,int(edge1)+y1),(int(edge2)+x2,int(edge1)+y2),(0,255,0),2)
-        
+#                     x1 = int(x0 + 30*(-b))
+#                     y1 = int(y0 + 30*(a))
+#                     x2 = int(x0 - 30*(-b))
+#                     y2 = int(y0 - 30*(a))
+#                     cv2.line(image,(int(edge1)+x1,int(edge2)+y1),(int(edge1)+x2,int(edge2)+y2),(0,255,0),2)
+
         minLineLength = 30
-        maxLineGap = 5
+        maxLineGap = 10
         lines = cv2.HoughLinesP(edges,1,np.pi/180,30,minLineLength,maxLineGap);
         if lines is not None: 
             for line in lines:
                 for x1,y1,x2,y2 in line:
-                    ctr_points = cv2.line(gray,(int(edge1)+x1,int(edge2)+y1),(int(edge1)+x2,int(edge2)+y2),(0,255,0),2)
-cv2.imshow("Image", gray)
+                    ctr_points = cv2.line(image,(int(edge1)+x1,int(edge2)+y1),(int(edge1)+x2,int(edge2)+y2),(0,255,0),2)
+                    ctr_x.append(int(edge1)+x1);
+                    ctr_y.append(int(edge2)+y1);
+cv2.imshow("Image", image)
 cv2.waitKey(0)& 0xFF
 
 
-# In[67]:
+# In[217]:
 
 
 line
 
 
-# In[68]:
+# In[218]:
 
 
 lines
 
 
-# In[69]:
+# In[219]:
 
 
 edges
 
 
-# In[79]:
+# In[220]:
 
 
-ctr_points
+ctr_points[0]
+
+
+# In[221]:
+
+
+ctr_x
+ctr_x[2]
+
+
+# In[222]:
+
+
+ctr_y;
+ctr_y[2]
+
+
+# In[223]:
+
+
+my_file = open("points.txt", "w")
+print("Имя файла: ", my_file.name)
+print("В каком режиме файл открыт: ", my_file.mode)
+for i in range(len(ctr_x)):
+    l = str(ctr_x[i])
+    r = str(ctr_y[i])
+    my_file.write(l + "," + r + "," + str(3) + "\n")
+my_file.close()
+
+my_file2 = open("points.txt")
+my_string = my_file2.read()
+print("Содержимое файла: ")
+print(my_string)
+my_file2.close()
 
